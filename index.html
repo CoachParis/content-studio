@@ -605,6 +605,18 @@
           <input type="radio" name="output" value="visual" onchange="selectType(this.parentElement)">
           <span class="type-label">Visual preview only</span>
         </label>
+        <label class="type-option">
+          <input type="radio" name="output" value="reel" onchange="selectType(this.parentElement)">
+          <span class="type-label">Reel / TikTok Script</span>
+        </label>
+        <label class="type-option">
+          <input type="radio" name="output" value="youtube" onchange="selectType(this.parentElement)">
+          <span class="type-label">YouTube Script</span>
+        </label>
+        <label class="type-option">
+          <input type="radio" name="output" value="voiceover" onchange="selectType(this.parentElement)">
+          <span class="type-label">Voiceover Script</span>
+        </label>
       </div>
     </div>
 
@@ -769,7 +781,10 @@ function buildThemePrompt(theme, outputType, themeObj) {
     all: 'Generate: hook (1 punchy line), caption (3-5 lines with hook embedded), carousel (5 slides with title + 1-2 lines each), hashtags (8-10 relevant tags). Return JSON: { hook, caption, carousel: [{slide, title, body}], hashtags, theme, track }',
     caption: 'Generate: hook (1 punchy line), caption (3-5 lines). Return JSON: { hook, caption, theme, track }',
     carousel: 'Generate a 5-slide carousel. Return JSON: { carousel: [{slide, title, body}], theme, track }',
-    visual: 'Generate 3 slide previews for a visual carousel. Return JSON: { slides: [{heading, subtext}], theme, track }'
+    visual: 'Generate 3 slide preview texts. Return JSON: { slides: [{heading, subtext}], theme, track }',
+    reel: 'Generate a Reel/TikTok script with: hook (first 3 seconds), 3-4 talking points with timing cues in seconds, and a CTA. Return JSON: { hook, script: [{timing, line}], cta, duration, theme, track }',
+    youtube: 'Generate a YouTube script with: title, hook (first 30 seconds), intro, 3 main points each with talking notes, outro, and CTA. Return JSON: { title, hook, intro, points: [{heading, notes}], outro, cta, theme, track }',
+    voiceover: 'Generate a voiceover script for a faceless video: hook line, 4-5 short punchy lines to read over b-roll, and a closing line. Return JSON: { hook, lines: [string], closing, theme, track }'
   };
 
   return `Write content for Paris Simone using the "${themeObj.name}" hook theme for the quiz track "${themeObj.track}". ${instructions[outputType]}`;
@@ -780,7 +795,10 @@ function buildTopicPrompt(topic, outputType) {
     all: 'Generate: hook (1 punchy line), caption (3-5 lines), carousel (5 slides with title + 1-2 lines each), hashtags (8-10 tags). Return JSON: { hook, caption, carousel: [{slide, title, body}], hashtags, theme, track }',
     caption: 'Generate: hook (1 punchy line), caption (3-5 lines). Return JSON: { hook, caption, theme, track }',
     carousel: 'Generate a 5-slide carousel. Return JSON: { carousel: [{slide, title, body}], theme, track }',
-    visual: 'Generate 3 slide preview texts. Return JSON: { slides: [{heading, subtext}], theme, track }'
+    visual: 'Generate 3 slide preview texts. Return JSON: { slides: [{heading, subtext}], theme, track }',
+    reel: 'Generate a Reel/TikTok script with: hook (first 3 seconds), 3-4 talking points with timing cues in seconds, and a CTA. Return JSON: { hook, script: [{timing, line}], cta, duration, theme, track }',
+    youtube: 'Generate a YouTube script with: title, hook (first 30 seconds), intro, 3 main points each with talking notes, outro, and CTA. Return JSON: { title, hook, intro, points: [{heading, notes}], outro, cta, theme, track }',
+    voiceover: 'Generate a voiceover script for a faceless video: hook line, 4-5 short punchy lines to read over b-roll, and a closing line. Return JSON: { hook, lines: [string], closing, theme, track }'
   };
 
   return `Write content for Paris Simone about this topic: "${topic}". Identify the most fitting SISS hook theme and quiz track. ${instructions[outputType]}`;
@@ -857,6 +875,58 @@ function renderOutput(data, themeInfo, outputType) {
   if (data.hashtags) {
     const tags = Array.isArray(data.hashtags) ? data.hashtags.join(' ') : data.hashtags;
     html += makeBlock('Hashtags', tags);
+  }
+
+  // REEL SCRIPT
+  if (data.script) {
+    let reelText = `HOOK (0-3s): ${data.hook}
+
+`;
+    reelText += data.script.map(s => `[${s.timing}] ${s.line}`).join('
+');
+    reelText += `
+
+CTA: ${data.cta}`;
+    if (data.duration) reelText += `
+Estimated duration: ${data.duration}`;
+    html += makeBlock('Reel / TikTok Script', reelText);
+  }
+
+  // YOUTUBE SCRIPT
+  if (data.points && data.intro) {
+    let ytText = `TITLE: ${data.title || ''}
+
+HOOK:
+${data.hook}
+
+INTRO:
+${data.intro}
+
+`;
+    ytText += data.points.map((p, i) => `POINT ${i+1}: ${p.heading}
+${p.notes}`).join('
+
+');
+    ytText += `
+
+OUTRO:
+${data.outro}
+
+CTA: ${data.cta}`;
+    html += makeBlock('YouTube Script', ytText);
+  }
+
+  // VOICEOVER SCRIPT
+  if (data.lines) {
+    let voText = `HOOK: ${data.hook}
+
+`;
+    voText += data.lines.map((l, i) => `[${i+1}] ${l}`).join('
+');
+    voText += `
+
+CLOSING: ${data.closing}`;
+    html += makeBlock('Voiceover Script', voText);
   }
 
   html += `</div>`;
