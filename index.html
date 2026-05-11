@@ -673,10 +673,11 @@ const themeData = {
 function setMode(mode) {
   currentMode = mode;
   document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
+  document.querySelectorAll('.mode-btn').forEach(b => {
+    if (b.getAttribute('onclick').includes(mode)) b.classList.add('active');
+  });
   document.getElementById('theme-section').style.display = mode === 'theme' ? 'block' : 'none';
-  const ts = document.getElementById('topic-section');
-  ts.classList.toggle('visible', mode === 'topic');
+  document.getElementById('topic-section').style.display = mode === 'topic' ? 'block' : 'none';
 }
 
 function selectTheme(el, theme) {
