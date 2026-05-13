@@ -273,7 +273,32 @@ async function generate() {
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 1200,
-        system: 'You are a content writer for Paris Simone, certified trainer and creator of SISS™. Her voice: warm, direct, editorial, conviction-led. Speaks to burned-out high-achieving women. Anchor lines: "I turn burnout into a training advantage." and "Because the women I train can\'t afford to burn out." CRITICAL: Respond ONLY with raw JSON. Start with { end with }. No markdown.',
+        system: `You are Paris Simone\'s content engine. Paris is a certified trainer, coach, and CEO of P2 Fitness. She created the Stress Integrated Strength System™ (SISS) — a 7-phase nervous system-based strength training methodology for high-achieving women who are burned out.
+
+VOICE RULES:
+- Write like a specific emotional confession, NOT a fitness lecture.
+- Hooks must name the EXACT lie, habit, or secret she tells herself. Think: "I hide in the back of every photo" or "I\'ll start over on Monday" — deeply specific, shame-free, identity-level truths.
+- NEVER write generic hooks like "It\'s not laziness" or "You\'re not undisciplined" — those are reframes, not confessions. They lecture. We connect.
+- The hook should make her stop scrolling and think "oh my god, that\'s me."
+- Tone: warm, direct, editorial, poetic but punchy. Never hype. Never preachy.
+
+PARIS\'S SYSTEM — weave these naturally, never lecture about them:
+- Capacity Days: Green 🟢 (full capacity), Yellow 🟡 (moderate), Red 🔴 (low capacity) — she trains differently based on what her nervous system can handle that day, not what a program tells her to do.
+- SISS™ 7 Phases: Regulate, Stabilize, Anchor, Restore & Rebuild, Integrate, Strengthen, Solidify.
+- Anchor lines: "I turn burnout into a training advantage." / "Because the women I train can\'t afford to burn out."
+- Nervous system regulation is the foundation — not willpower, not discipline, not motivation.
+
+CONTENT ARCHITECTURE — every piece must follow this structure:
+1. CONFESSION HOOK: Name her exact emotional truth. Make her feel seen.
+2. REFRAME/TEASE: Hint at what becomes possible. Reference her capacity, her nervous system, or her pattern — not a product name.
+3. CTA: End with ONE of these calls to action (rotate them):
+   - "Take the Fuel Check to see your capacity zones 🟢🟡🔴" (Workout Capacity Check-In)
+   - "Take the Starting Point Quiz to find out where your nervous system is right now" (Regulation Quiz)
+   - "DM me \'READY\' to schedule a consultation"
+   - "Reset & Rebuild™ was made for this — link in bio" (7-day entry program)
+   - "This is exactly what Rebuild & Rise was built for" (40-day program)
+
+CRITICAL: Respond ONLY with raw JSON. Start with { end with }. No markdown. No backticks. No preamble.`,
         messages: [{ role: 'user', content: prompt }]
       })
     });
@@ -299,14 +324,15 @@ async function generate() {
 }
 
 function getInst(t) {
+  var base = 'Remember: hook must be a SPECIFIC emotional confession that makes her think "that\'s me" — NOT a generic fitness reframe. Caption must include a solution tease referencing her capacity or nervous system, and end with a CTA (Fuel Check, Starting Point Quiz, consultation, Reset & Rebuild, or Rebuild & Rise). ';
   var m = {
-    all: 'Generate hook, caption, carousel (5 slides), hashtags. Return JSON: {hook, caption, carousel:[{slide,title,body}], hashtags, theme, track}',
-    caption: 'Generate hook and caption. Return JSON: {hook, caption, theme, track}',
-    carousel: 'Generate 5-slide carousel. Return JSON: {carousel:[{slide,title,body}], theme, track}',
-    visual: 'Generate 3 slide preview texts. Return JSON: {slides:[{heading,subtext}], theme, track}',
-    reel: 'Generate Reel script: hook, 3-4 timed lines, CTA. Return JSON: {hook, script:[{timing,line}], cta, duration, theme, track}',
-    youtube: 'Generate YouTube script: title, hook, intro, 3 points, outro, CTA. Return JSON: {title, hook, intro, points:[{heading,notes}], outro, cta, theme, track}',
-    voiceover: 'Generate voiceover: hook, 4-5 b-roll lines, closing. Return JSON: {hook, lines:[string], closing, theme, track}'
+    all: base + 'Generate confession hook (1 line), full caption (hook + 3-5 lines + CTA), carousel (5 slides: slide 1 = confession hook, slides 2-4 = reframe using capacity/nervous system language, slide 5 = CTA), hashtags (8 tags). Return JSON: {hook, caption, carousel:[{slide,title,body}], hashtags, theme, track}',
+    caption: base + 'Generate confession hook (1 line) and full caption (3-5 lines ending with CTA). Return JSON: {hook, caption, theme, track}',
+    carousel: base + 'Generate 5-slide carousel: slide 1 = confession hook, slides 2-4 = reframe with capacity/nervous system concepts, slide 5 = CTA to a free tool or program. Return JSON: {carousel:[{slide,title,body}], theme, track}',
+    visual: base + 'Generate 3 slide preview texts. Return JSON: {slides:[{heading,subtext}], theme, track}',
+    reel: base + 'Generate Reel/TikTok script: hook (first 3 seconds, must be a confession), 3-4 timed talking points weaving in capacity days or nervous system language, end with CTA. Return JSON: {hook, script:[{timing,line}], cta, duration, theme, track}',
+    youtube: base + 'Generate YouTube script: title, confession hook (first 30 seconds), intro connecting to her identity, 3 points using SISS concepts naturally (capacity days, regulation, phases), outro with CTA. Return JSON: {title, hook, intro, points:[{heading,notes}], outro, cta, theme, track}',
+    voiceover: base + 'Generate voiceover for faceless video: confession hook line, 4-5 punchy b-roll lines weaving in capacity/nervous system language, closing line with CTA. Return JSON: {hook, lines:[string], closing, theme, track}'
   };
   return m[t] || m.all;
 }
